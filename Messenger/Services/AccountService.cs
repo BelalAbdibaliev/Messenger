@@ -1,4 +1,5 @@
-﻿using Messenger.Dto;
+﻿using Messenger.Data;
+using Messenger.Dto;
 using Messenger.Entities;
 using Messenger.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -9,11 +10,13 @@ public class AccountService : IAccountService
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
+    private readonly TokenProvider _tokenProvider;
 
-    public AccountService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+    public AccountService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, TokenProvider tokenProvider)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _tokenProvider = tokenProvider;
     }
     
     public async Task<AccountResponse> Login(LoginDto loginDto)
@@ -24,8 +27,8 @@ public class AccountService : IAccountService
             throw new ApplicationException("Incorrect email or password");
         
         var result = _signInManager.PasswordSignInAsync(user, loginDto.Password, false, false);
-        
-        await _signInManager.SignInAsync(user, false);
+
+        var token = _tokenProvider.CreateToken(user);
         
         return new AccountResponse
         {
@@ -33,6 +36,7 @@ public class AccountService : IAccountService
             LastName = user.LastName,
             Email = user.Email,
             UserName = user.UserName,
+            Token = token
         };
     }
 
@@ -45,7 +49,7 @@ public class AccountService : IAccountService
         var newUser = new AppUser
         {
             Email = registerDto.Email,
-            UserName = registerDto.Email,
+            UserName = registerDto.UserName,
             FirstName = registerDto.FirstName,
             LastName = registerDto.LastName,
         };
@@ -55,8 +59,8 @@ public class AccountService : IAccountService
         if(!creationResult.Succeeded)
             throw new ApplicationException("Failed to create user");
         
-        await _userManager.AddToRoleAsync(newUser, "User");
-        await _signInManager.SignInAsync(newUser, false);
+        await _userManager.AddToRoleAsync(newUser, UserRoles.User);
+        var token = _tokenProvider.CreateToken(newUser);
         
         return new AccountResponse
         {
@@ -64,6 +68,7 @@ public class AccountService : IAccountService
             UserName = registerDto.UserName,
             FirstName = registerDto.FirstName,
             LastName = registerDto.LastName,
+            Token = token
         };
     }
 }

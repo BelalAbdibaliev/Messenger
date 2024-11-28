@@ -1,10 +1,13 @@
+using System.Text;
 using Messenger.Data;
 using Messenger.Entities;
 using Messenger.Interfaces;
 using Messenger.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +18,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddSingleton<TokenProvider>();
 
 builder.Services.AddDbContext<MessengerDbContext>(options =>
 {
@@ -26,8 +30,21 @@ builder.Services.AddIdentity<AppUser, IdentityRole>()
 builder.Services.AddMemoryCache();
 // builder.Services.AddAuthentication()
 //     .AddBearerToken(IdentityConstants.ApplicationScheme);
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["JWT:Issuer"],
+            ValidAudience = builder.Configuration["JWT:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
+        };
+    });
 
 builder.Services.AddEndpointsApiExplorer();
 

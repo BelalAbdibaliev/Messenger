@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Messenger.Controllers;
 
-[Route("api/[controller]")]
+[Route("[controller]/")]
 [ApiController]
 public class AccountController : ControllerBase
 {
@@ -20,11 +20,18 @@ public class AccountController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginDto loginDto)
     {
+        if(!ModelState.IsValid)
+            return BadRequest();
+        
         return Ok(await _accountService.Login(loginDto));
     }
 
+    [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterDto registerDto)
     {
-        return Ok();
+        if(!ModelState.IsValid)
+            return BadRequest();
+        
+        return Ok(await _accountService.Register(registerDto));
     }
 }
