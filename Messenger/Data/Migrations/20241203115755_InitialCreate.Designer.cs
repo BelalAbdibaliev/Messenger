@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Messenger.Data.Migrations
 {
     [DbContext(typeof(MessengerDbContext))]
-    [Migration("20241119090504_AppUserTableEdited")]
-    partial class AppUserTableEdited
+    [Migration("20241203115755_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

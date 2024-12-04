@@ -1,6 +1,7 @@
 using System.Text;
 using Messenger.Data;
 using Messenger.Entities;
+using Messenger.Hubs;
 using Messenger.Interfaces;
 using Messenger.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -16,6 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddSingleton<TokenProvider>();
@@ -46,6 +48,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MyCorsPolicy", policy =>
+    {
+        policy.WithOrigins("http://127.0.0.1:5500")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
@@ -60,6 +73,9 @@ if (app.Environment.IsDevelopment())
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseCors("MyCorsPolicy");
+
+app.MapHub<MessagesHub>("/messages");
 
 app.MapControllers();
 app.UseHttpsRedirection();
