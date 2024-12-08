@@ -5,8 +5,8 @@ namespace Messenger.Hubs;
 
 public class MessagesHub : Hub
 {
-    public async Task SendMessage(string messageContent)
+    public async Task SendMessage(ReceiveMessageDto messageDto)
     {
-        Clients.All.SendAsync("ReceiveMessage", messageContent);
+        await Clients.All.SendAsync("ReceiveMessage", messageDto);
     }
 }

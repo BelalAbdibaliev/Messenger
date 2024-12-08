@@ -17,7 +17,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+    options.MaximumReceiveMessageSize = null;
+    options.KeepAliveInterval = TimeSpan.FromSeconds(5);
+    options.ClientTimeoutInterval = null;
+});
 
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddSingleton<TokenProvider>();
