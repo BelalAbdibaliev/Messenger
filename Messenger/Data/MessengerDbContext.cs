@@ -12,5 +12,5 @@ public class MessengerDbContext : IdentityDbContext<AppUser>
         
     }
     
-    DbSet<Message> Messages { get; set; }
+    public DbSet<Message> Messages { get; set; }
 }

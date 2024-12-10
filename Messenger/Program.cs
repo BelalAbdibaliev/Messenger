@@ -3,6 +3,7 @@ using Messenger.Data;
 using Messenger.Entities;
 using Messenger.Hubs;
 using Messenger.Interfaces;
+using Messenger.Repositories;
 using Messenger.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -26,6 +27,7 @@ builder.Services.AddSignalR(options =>
 });
 
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddSingleton<TokenProvider>();
 
 builder.Services.AddDbContext<MessengerDbContext>(options =>
