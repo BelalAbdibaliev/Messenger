@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Messenger.Controllers;
 
-[Route("[controller]/")]
+[Route("account/")]
 [ApiController]
 public class AccountController : ControllerBase
 {

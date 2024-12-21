@@ -16,10 +16,11 @@ public class MessagesHub : Hub
     
     public async Task SendMessage(ReceiveMessageDto messageDto)
     {
+        
         Message messageModel = new Message
         {
             Id = Guid.NewGuid(),
-            SendTime = DateTime.Now,
+            SendTime = DateTime.UtcNow,
             ReceiverId = messageDto.ReceiverId,
             SenderId = messageDto.SenderId,
             Content = messageDto.Content,
@@ -31,6 +32,6 @@ public class MessagesHub : Hub
         if(result)
             Console.WriteLine($"Successfully sent message: {messageDto.Content}");
         
-        await Clients.All.SendAsync("ReceiveMessage", messageDto);
+        await Clients.All.SendAsync("ReceiveMessage", messageModel);
     }
 }

@@ -32,7 +32,7 @@ builder.Services.AddSingleton<TokenProvider>();
 
 builder.Services.AddDbContext<MessengerDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 builder.Services.AddIdentity<AppUser, IdentityRole>()
@@ -78,10 +78,15 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+using var scope = app.Services.CreateScope();
+await using var dbContext = scope.ServiceProvider.GetRequiredService<MessengerDbContext>();
+await dbContext.Database.EnsureCreatedAsync();
+
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseCors("MyCorsPolicy");
+app.MapScalarApiReference();
 
 app.MapHub<MessagesHub>("/messages");
 
