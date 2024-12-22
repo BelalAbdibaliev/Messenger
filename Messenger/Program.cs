@@ -75,12 +75,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference();
 }
-
-using var scope = app.Services.CreateScope();
-await using var dbContext = scope.ServiceProvider.GetRequiredService<MessengerDbContext>();
-await dbContext.Database.EnsureCreatedAsync();
 
 app.UseRouting();
 app.UseAuthentication();
