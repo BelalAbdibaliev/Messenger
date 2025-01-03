@@ -5,7 +5,6 @@ using Messenger.Hubs;
 using Messenger.Interfaces;
 using Messenger.Repositories;
 using Messenger.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +25,15 @@ builder.Services.AddSignalR(options =>
     options.ClientTimeoutInterval = null;
 });
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = context =>
+    {
+        context.ProblemDetails.Extensions.Add("instanceId", context.HttpContext.TraceIdentifier);
+    };
+});
+
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddSingleton<TokenProvider>();
@@ -38,8 +46,6 @@ builder.Services.AddDbContext<MessengerDbContext>(options =>
 builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<MessengerDbContext>();
 builder.Services.AddMemoryCache();
-// builder.Services.AddAuthentication()
-//     .AddBearerToken(IdentityConstants.ApplicationScheme);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -71,9 +77,29 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
+app.UseExceptionHandler();
+app.UseStatusCodePages();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    using (var scope = app.Services.CreateScope())
+    {
+        var serviceProvider = scope.ServiceProvider;
+        var dbContext = serviceProvider.GetRequiredService<MessengerDbContext>();
+        dbContext.Database.Migrate();
+
+        try
+        {
+            await Seed.SeedRolesAsync(serviceProvider);
+        }
+        catch (Exception ex)
+        {
+            var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "Ошибка при добавлении ролей");
+        }
+    }
+    
     app.MapOpenApi();
 }
 

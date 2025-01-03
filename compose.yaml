@@ -5,8 +5,8 @@ services:
       context: .
       dockerfile: Messenger/Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=messengerdb;Username=postgres;Password=postgres;
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=messengerdb-container;Port=5432;Database=messengerdb;Username=postgres;Password=postgres;
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -15,7 +15,7 @@ services:
 
   postgres:
     image: postgres:15  
-    container_name: messagedb-container
+    container_name: messengerdb-container
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres

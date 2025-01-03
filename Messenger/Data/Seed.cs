@@ -7,8 +7,13 @@ static public class Seed
     public static async Task SeedRolesAsync(IServiceProvider serviceProvider)
     {
         var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-        var roles = new[] { "USER", "ADMIN" };
+        
+        var roles = new List<string>
+        {
+            "Admin",
+            "User",
+            "Moderator"
+        };
 
         foreach (var role in roles)
         {
@@ -18,5 +23,4 @@ static public class Seed
             }
         }
     }
-
 }

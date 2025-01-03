@@ -24,7 +24,7 @@ public class AccountService : IAccountService
         var user = await _userManager.FindByEmailAsync(loginDto.Email);
         
         if (user == null || !await _userManager.CheckPasswordAsync(user, loginDto.Password))
-            throw new ApplicationException("Incorrect email or password");
+            throw new ArgumentException("Incorrect email or password");
         
         var result = _signInManager.PasswordSignInAsync(user, loginDto.Password, false, false);
 
@@ -36,7 +36,8 @@ public class AccountService : IAccountService
             LastName = user.LastName,
             Email = user.Email,
             UserName = user.UserName,
-            Token = token
+            Token = token,
+            Id = user.Id
         };
     }
 
@@ -44,7 +45,7 @@ public class AccountService : IAccountService
     {
         var user = await _userManager.FindByEmailAsync(registerDto.Email);
         if(user != null)
-            throw new ApplicationException("Email already registered");
+            throw new ArgumentException("Email already taken");
 
         var newUser = new AppUser
         {
@@ -61,7 +62,7 @@ public class AccountService : IAccountService
         
         await _userManager.AddToRoleAsync(newUser, UserRoles.User);
         var token = _tokenProvider.CreateToken(newUser);
-        
+       
         return new AccountResponse
         {
             Email = newUser.Email,
