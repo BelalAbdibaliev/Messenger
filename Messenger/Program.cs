@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +37,7 @@ builder.Services.AddProblemDetails(options =>
 
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<IFindContactsService, FindContactsService>();
 builder.Services.AddSingleton<TokenProvider>();
 
 builder.Services.AddDbContext<MessengerDbContext>(options =>
@@ -83,7 +85,7 @@ app.UseStatusCodePages();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    using (var scope = app.Services.CreateScope())
+    /*using (var scope = app.Services.CreateScope())
     {
         var serviceProvider = scope.ServiceProvider;
         var dbContext = serviceProvider.GetRequiredService<MessengerDbContext>();
@@ -98,16 +100,16 @@ if (app.Environment.IsDevelopment())
             var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
             logger.LogError(ex, "Ошибка при добавлении ролей");
         }
-    }
+    }*/
     
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseCors("MyCorsPolicy");
-app.MapScalarApiReference();
 
 app.MapHub<MessagesHub>("/messages");
 
